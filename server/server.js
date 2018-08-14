@@ -8,8 +8,8 @@ var {user} = require('./modules/user');
 
 
 var app = express();
-const port = process.env.PORT || 3000;
-
+const port = 3000;
+// process.env.PORT
 
 app.use(bodyParser.json());
 
@@ -55,6 +55,22 @@ app.get('/todos/:id', (req, res) =>{
 
 });
 
+app.delete('/todos/:id', (req,res) =>{
+    var {id} = req.params;
+
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send();
+    }
+    Todo.findByIdAndRemove(id).then((todo) =>{
+        if(todo == null){
+            return res.status(404).send();
+        } else{
+             res.send(todo);
+        }
+    }).catch((err) => {
+        res.status(404).send();
+    });
+});
 
 //start the server
 app.listen(port, () =>{
