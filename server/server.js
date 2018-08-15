@@ -5,12 +5,12 @@ const {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./modules/todo');
-var {user} = require('./modules/user');
+var {User} = require('./modules/user');
 
 
 var app = express();
-const port = 3000;
-// process.env.PORT
+const port = process.env.PORT || 3000;
+ 
 
 app.use(bodyParser.json());
 
@@ -105,8 +105,23 @@ app.patch('/todos/:id', (req,res)=>{
     }).catch((e) =>{
         res.status(404).send();
     })
+});
 
+app.post('/users', (req,res)=>{
+    var body = _.pick(req.body, ['email', 'password']);
+    var user = new User(body);
 
+    /*
+    User.FindByToken
+    user.generateAuthToken
+    */
+    user.save().then(() =>{
+        return user.generateAuthToken();
+    }).then((token)=>{
+        res.header('x-auth', token).send(user);
+    }).catch((e) =>{
+        res.status(400).send(e);
+    })
 });
 
 //start the server
