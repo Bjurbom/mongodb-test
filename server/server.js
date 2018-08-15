@@ -6,6 +6,7 @@ const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./modules/todo');
 var {User} = require('./modules/user');
+var {authenticate} = require('./middleware/authenticate.js');
 
 
 var app = express();
@@ -123,6 +124,14 @@ app.post('/users', (req,res)=>{
         res.status(400).send(e);
     })
 });
+
+
+
+
+
+app.get('/users/me', authenticate, (req,res) =>{
+    res.send(req.user);
+})
 
 //start the server
 app.listen(port, () =>{
