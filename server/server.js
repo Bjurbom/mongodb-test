@@ -15,10 +15,11 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-app.post('/todos',(req,res) =>{
+app.post('/todos', authenticate, (req,res) =>{
 
     var todo = new Todo({
-        text: req.body.text
+        text : req.body.text,
+        _creator: req.user._id
     });
 
 
@@ -29,11 +30,18 @@ app.post('/todos',(req,res) =>{
     })
 });
 
-app.get('/todos', (req, res) =>{
- Todo.find().then((todos) =>{
+app.get('/todos', authenticate ,(req, res) =>{
+ Todo.find({
+     _creator: req.user._id
+
+ }).then((todos) =>{
+
     res.send({todos});
+
  }, (e) =>{
+
     res.status(400).send(e);
+
  })
 }); 
 
@@ -109,7 +117,7 @@ app.patch('/todos/:id', (req,res)=>{
 });
 
 
-
+// registrera en ny användare
 app.post('/users', (req,res)=>{
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User(body);
@@ -127,6 +135,7 @@ app.post('/users', (req,res)=>{
     })
 });
 
+//loggar in av em användaren
 app.post('/users/login', (req,res) =>{
 
     var body = _.pick(req.body,['email', 'password']);
@@ -142,6 +151,7 @@ app.post('/users/login', (req,res) =>{
     
 });
 
+//loggar ut användaren
 app.delete('/users/me/token', authenticate, (req,res) =>{
     req.user.removeToken(req.token).then(() =>{
         res.status(200).send();
@@ -150,6 +160,7 @@ app.delete('/users/me/token', authenticate, (req,res) =>{
     });
 })
 
+//hämtar använder efter inlogning
 app.get('/users/me', authenticate, (req,res) =>{
     res.send(req.user);
 })
